@@ -54,15 +54,24 @@ instance Show FractionalLit where
                (acs, pcs) -> (reverse pcs++) . ('.':) . (reverse acs++)
    | otherwise         = shows m . (replicate e '0'++)
 
+infixl 7 `unbiasedDiv`
+unbiasedDiv :: Integral a => a -> a -> a
+unbiasedDiv x y = (x - y`quot`2)`div`y
+
 instance Num FractionalLit where
   fromInteger = ExactRatio . fromInteger
   ExactRatio r₀ + ExactRatio r₁ = ExactRatio $ r₀ + r₁
   DecimalFraction m e + ExactRatio r
       = DecimalFraction (m + round (10/2^^e)) e
   DecimalFraction m₀ e₀ + DecimalFraction m₁ e₁
-   | e₀ <= e₁  = let erdr = 10^(e₁ - e₀)
-                 in DecimalFraction ((m₀ + erdr`quot`2)`div`erdr + m₁) e₁
+   | e₀ <= e₁  = DecimalFraction (m₀`unbiasedDiv`10^(e₁ - e₀) + m₁) e₁
   n + m = m + n
+  ExactRatio r₀ * ExactRatio r₁ = ExactRatio $ r₀ * r₁
+  DecimalFraction m e * ExactRatio r
+     = DecimalFraction ((m * numerator r)`unbiasedDiv`denominator r) e
+  DecimalFraction m₀ e₀ * DecimalFraction m₁ e₁
+        = DecimalFraction (m₀*m₁) (e₀+e₁)
+  n * m = m * n
   negate (ExactRatio r) = ExactRatio $ -r
   negate (DecimalFraction m e) = DecimalFraction (-m) e
 

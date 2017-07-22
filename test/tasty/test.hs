@@ -21,7 +21,10 @@ main = defaultMain tests
 
 
 reshowTest :: FractionalLit -> String -> TestTree
-reshowTest n str = testCase str $ show n @?= str
+reshowTest n str = reshowTestCase str n str
+
+reshowTestCase :: String -> FractionalLit -> String -> TestTree
+reshowTestCase info n str = testCase info $ show n @?= str
 
 tests :: TestTree
 tests = testGroup "Tests"
@@ -37,6 +40,11 @@ tests = testGroup "Tests"
      , reshowTest              0.254 "0.254"
      , reshowTest (-1.167925373e-12) "-1.167925373e-12"
      , reshowTest          (-142125) "-142125"
+     ]
+  , testGroup "Simple arithmetic"
+     [ reshowTestCase "37 + 15" (37 + 15) "52"
+     , reshowTestCase "37 + 15.8" (37 + 15.8) "52.8"
+     , reshowTestCase "37.1 + 15.8" (37.1 + 15.8) "52.9"
      ]
   ]
 
