@@ -39,8 +39,8 @@ instance Show FractionalLit where
    | denominator r > 1  = showParen (p>6)
                  $ showsPrec 7 (numerator r) . ('/':) . showsPrec 7 (denominator r)
    | otherwise          = shows $ numerator r
-  showsPrec _ (DecimalFraction m e)
-   | m < 0             = ('-':) . shows (DecimalFraction (-m) e)
+  showsPrec p (DecimalFraction m e)
+   | m < 0             = showParen (p>5) $ ('-':) . shows (DecimalFraction (-m) e)
    | e > 6 || e < -2   = case show m of
                (hd:[]) -> (hd:) . ("e"++) . shows e
                (hd:lds) -> (hd:) . ('.':) . (lds++) . ("e"++) . shows (e + length lds)
@@ -58,9 +58,12 @@ instance Num FractionalLit where
    | e₀ <= e₁  = let erdr = 10^(e₁ - e₀)
                  in DecimalFraction ((m₀ + erdr`quot`2)`div`erdr + m₁) e₁
   n + m = m + n
+  negate (ExactRatio r) = ExactRatio $ -r
+  negate (DecimalFraction m e) = DecimalFraction (-m) e
 
 instance Fractional FractionalLit where
   fromRational r
+    | r < 0               = negate $ fromRational (-r)
     | denominator r == 1  = goI 0 0 $ numerator r
     | otherwise           = goF 0 0 $ denominator r
    where goI n2 n5 u
