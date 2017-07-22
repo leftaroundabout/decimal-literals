@@ -42,6 +42,11 @@ instance Show FractionalLit where
   showsPrec p (DecimalFraction m e)
    | m < 0             = showParen (p>5) $ ('-':) . shows (DecimalFraction (-m) e)
    | e > 6 || e < -2   = case show m of
+               lsh | e<0, length lsh + 1 > -e
+                           -> case splitAt (-e) $ reverse lsh of
+                             (acs, []) -> ("0."++) . (replicate (-e-length acs) '0'++)
+                                           . (reverse acs++)
+                             (acs, pcs) -> (reverse pcs++) . ('.':) . (reverse acs++)
                (hd:[]) -> (hd:) . ("e"++) . shows e
                (hd:lds) -> (hd:) . ('.':) . (lds++) . ("e"++) . shows (e + length lds)
    | e < 0             = case splitAt (-e) . reverse $ show m of
