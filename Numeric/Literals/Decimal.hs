@@ -101,6 +101,9 @@ instance Fractional FractionalLit where
   ExactRatio r₀ / ExactRatio r₁ = ExactRatio $ r₀ / r₁
   DecimalFraction m e / ExactRatio r
      = DecimalFraction ((m * denominator r)`unbiasedDiv`numerator r) e
+  ExactRatio r / DecimalFraction m e
+     = DecimalFraction (round $ r * 10^dp / fromIntegral m) (-dp-e)
+   where dp = ceiling . logBase 10 $ fromIntegral m
   DecimalFraction m₀ e₀ / DecimalFraction m₁ e₁
         = DecimalFraction ((m₀*10^dp)`unbiasedDiv`m₁) (e₀-e₁-dp)
    where dp = ceiling . logBase 10 $ fromIntegral m₁
