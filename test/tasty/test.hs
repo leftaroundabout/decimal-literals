@@ -26,6 +26,16 @@ reshowTest n str = reshowTestCase str n str
 reshowTestCase :: String -> FractionalLit -> String -> TestTree
 reshowTestCase info n str = testCase info $ show n @?= str
 
+scientificTest :: FractionalLit -> ((Int, String), Int) -> TestTree
+scientificTest l ((pc,ac),e) = testCase (show pc++'.':ac++"×10^"++show e) $ case l of
+       Scientific pc' ac' e' | pc'==pc && ac==(show=<<ac') && e'==e
+                                 -> return ()
+                             | otherwise
+                                 -> assertFailure $ "Got "++show pc'++'.':(show=<<ac')
+                                                       ++ "×10^"++show e'
+       _ -> assertFailure "Got exact fraction"
+       
+
 tests :: TestTree
 tests = testGroup "Tests"
   [ testGroup "Re-showing literals"
@@ -65,6 +75,9 @@ tests = testGroup "Tests"
      , reshowTestCase "37.1 / 15.8" (37.1 / 15.8) "2.348"
      , reshowTestCase "3.11e-13 / 15" (3.11e-13 / 15) "2.1e-14"
      , reshowTestCase "3.11e9 / 15" (3.11e9 / 15) "2.1e8"
+     ]
+  , testGroup "Scientific deconstruction"
+     [ scientificTest (37/8) ((4,"625"),0)
      ]
   ]
 

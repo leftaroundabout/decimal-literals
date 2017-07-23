@@ -12,6 +12,7 @@
 module Numeric.Literals.Decimal
           ( FractionalLit
           , pattern (:%)
+          , pattern Scientific
           ) where
 
 import Data.Ratio
