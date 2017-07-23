@@ -62,7 +62,7 @@ instance Num FractionalLit where
   fromInteger = ExactRatio . fromInteger
   ExactRatio r₀ + ExactRatio r₁ = ExactRatio $ r₀ + r₁
   DecimalFraction m e + ExactRatio r
-      = DecimalFraction (m + round (10/2^^e)) e
+      = DecimalFraction (m + round (r * 10^^(-e))) e
   DecimalFraction m₀ e₀ + DecimalFraction m₁ e₁
    | e₀ <= e₁  = DecimalFraction (m₀`unbiasedDiv`10^(e₁ - e₀) + m₁) e₁
   n + m = m + n

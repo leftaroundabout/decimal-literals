@@ -36,6 +36,7 @@ tests = testGroup "Tests"
      , reshowTest               0.04 "0.04"
      , reshowTest              0.008 "8e-3"
      , reshowTest              1e-52 "1e-52"
+     , reshowTest             3.11e9 "3.11e9"
      , reshowTest    1.167925373e-12 "1.167925373e-12"
      , reshowTest              0.254 "0.254"
      , reshowTest (-1.167925373e-12) "-1.167925373e-12"
@@ -45,6 +46,9 @@ tests = testGroup "Tests"
      [ reshowTestCase "37 + 15" (37 + 15) "52"
      , reshowTestCase "37 + 15.8" (37 + 15.8) "52.8"
      , reshowTestCase "37.1 + 15.8" (37.1 + 15.8) "52.9"
+     , reshowTestCase "3.11e-13 + 15" (3.11e-13 + 15) "15.000000000000311"
+     , reshowTestCase "3.11e9 + 15"  -- the 15 is insignificant here!
+                                    (3.11e9 + 15) "3.11e9"
      ]
   ]
 
