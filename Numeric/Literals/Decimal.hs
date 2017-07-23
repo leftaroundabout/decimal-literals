@@ -7,8 +7,12 @@
 -- Stability   : experimental
 -- Portability : portable
 -- 
+{-# LANGUAGE PatternSynonyms, ViewPatterns #-}
 
-module Numeric.Literals.Decimal where
+module Numeric.Literals.Decimal
+          ( FractionalLit
+          , pattern (:%)
+          ) where
 
 import Data.Ratio
 
@@ -23,6 +27,44 @@ data FractionalLit = ExactRatio Rational
                    | DecimalFraction {
                        decimalMantissa :: Integer
                      , decimalExponent :: Int }
+
+asFraction :: FractionalLit -> Maybe (Integer, Integer)
+asFraction (ExactRatio r) = Just (numerator r, denominator r)
+asFraction (DecimalFraction _ _) = Nothing
+
+pattern (:%) :: Integer -> Integer -> FractionalLit
+pattern n:%d <- (asFraction -> Just (n,d))
+ where n:%d = ExactRatio $ fromInteger n % fromInteger d
+
+asScientific :: FractionalLit -> Maybe ((Int, [B₁₀Digit]), Int)
+asScientific (ExactRatio _) = Nothing
+asScientific n = case break (=='e') $ show n of
+      (m, 'e':e) -> Just (splitMantissa m, read e)
+      (m, [])    -> Just (splitMantissa m, 0)
+ where splitMantissa m = case break (=='.') m of
+         (pm,'.':am) -> (read pm, toEnum . fromEnum<$>am)
+         (pm,[])     -> (read pm, [])
+
+pattern Scientific :: Int        -- ^ Integral part of the mantissa
+                   -> [B₁₀Digit] -- ^ Digits after the point of the mantissa
+                   -> Int        -- ^ Base-10 exponent of the number in scientific form
+                   -> FractionalLit
+pattern Scientific pc ac ex <- (asScientific -> Just ((pc,ac),ex))
+ where Scientific pc ac ex = DecimalFraction (nqr (fromIntegral pc) ac) $ ex - length ac
+        where nqr n [] = n
+              nqr n (d:ds) = nqr (n*10 + fromIntegral (fromEnum d)) ds
+              
+
+data B₁₀Digit = D0 | D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8 | D9 deriving (Enum, Eq)
+instance Show B₁₀Digit where show = show . fromEnum
+instance Num B₁₀Digit where
+  fromInteger = toEnum . (`mod`10) . fromInteger
+  d + e = toEnum $ (fromEnum d + fromEnum e)`mod`10
+  d * e = toEnum $ (fromEnum d * fromEnum e)`mod`10
+  d - e = toEnum $ (fromEnum d - fromEnum e)`mod`10
+  abs = id
+  signum D0 = 0
+  signum _ = 1
 
 instance Eq FractionalLit where
   ExactRatio r₀ == ExactRatio r₁  =  r₀==r₁
