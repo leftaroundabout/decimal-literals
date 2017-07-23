@@ -43,8 +43,12 @@ asScientific n = case break (=='e') $ show n of
       (m, 'e':e) -> Just (splitMantissa m, read e)
       (m, [])    -> Just (splitMantissa m, 0)
  where splitMantissa m = case break (=='.') m of
-         (pm,'.':am) -> (read pm, toEnum . fromEnum<$>am)
+         (pm,'.':am) -> (read pm, parseB₁₀<$>am)
          (pm,[])     -> (read pm, [])
+       parseB₁₀ c = case fromEnum c - fromEnum '0' of
+         i | i>=0 && i<10  -> toEnum i
+           | otherwise     -> error $
+               "Impossible digit "++[c]++" in number "++show n
 
 pattern Scientific :: Int        -- ^ Integral part of the mantissa
                    -> [B₁₀Digit] -- ^ Digits after the point of the mantissa

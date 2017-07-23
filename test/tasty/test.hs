@@ -77,7 +77,7 @@ tests = testGroup "Tests"
      , reshowTestCase "3.11e9 / 15" (3.11e9 / 15) "2.1e8"
      ]
   , testGroup "Scientific deconstruction"
-     [ scientificTest (37/8) ((4,"625"),0)
+     [ scientificTest 0.2537 ((0,"2537"),0)
      ]
   ]
 
