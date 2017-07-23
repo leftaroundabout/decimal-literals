@@ -49,6 +49,10 @@ tests = testGroup "Tests"
      , reshowTestCase "3.11e-13 + 15" (3.11e-13 + 15) "15.000000000000311"
      , reshowTestCase "3.11e9 + 15"  -- the 15 is insignificant here!
                                     (3.11e9 + 15) "3.11e9"
+     , reshowTestCase "3.11e6 + 15"  -- it's insignificant here too, but we'd still rather
+                                     -- not discard it when showing the zeroes anyway.
+                                    (3.11e6 + 15)--3110015
+                                                  "3110000"
      , reshowTestCase "37 * 15" (37 * 15) "555"
      , reshowTestCase "37 * 15.8" (37 * 15.8) "584.6"
      , reshowTestCase "37.1 * 15.8" (37.1 * 15.8) "586.18"
