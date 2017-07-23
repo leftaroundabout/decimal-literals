@@ -74,6 +74,10 @@ instance Num FractionalLit where
   n * m = m * n
   negate (ExactRatio r) = ExactRatio $ -r
   negate (DecimalFraction m e) = DecimalFraction (-m) e
+  abs (ExactRatio r) = ExactRatio $ abs r
+  abs (DecimalFraction m e) = DecimalFraction (abs m) e
+  signum (ExactRatio r) = ExactRatio $ signum r
+  signum (DecimalFraction m e) = ExactRatio . fromIntegral $ signum m
 
 instance Fractional FractionalLit where
   fromRational r
@@ -94,3 +98,9 @@ instance Fractional FractionalLit where
           | (d', 0) <- d`divMod`2  = goF (n2+1) n5 d'
           | (d', 0) <- d`divMod`5  = goF n2 (n5+1) d'
           | otherwise              = ExactRatio r
+  ExactRatio r₀ / ExactRatio r₁ = ExactRatio $ r₀ / r₁
+  DecimalFraction m e / ExactRatio r
+     = DecimalFraction ((m * denominator r)`unbiasedDiv`numerator r) e
+  DecimalFraction m₀ e₀ / DecimalFraction m₁ e₁
+        = DecimalFraction ((m₀*10^dp)`unbiasedDiv`m₁) (e₀-e₁-dp)
+   where dp = ceiling . logBase 10 $ fromIntegral m₁

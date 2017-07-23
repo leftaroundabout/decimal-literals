@@ -58,6 +58,13 @@ tests = testGroup "Tests"
      , reshowTestCase "37.1 * 15.8" (37.1 * 15.8) "586.18"
      , reshowTestCase "3.11e-13 * 15" (3.11e-13 * 15) "4.665e-12"
      , reshowTestCase "3.11e9 * 15" (3.11e9 * 15) "4.665e10"
+     , reshowTestCase "abs $ -1.167925373e-12" (abs $ -1.167925373e-12) "1.167925373e-12"
+     , reshowTestCase "abs $ -142125" (abs $ -142125) "142125"
+     , reshowTestCase "37 / 15" (37 / 15) "37/15"
+     , reshowTestCase "37 / 15.8" (37 / 15.8) "584.6"
+     , reshowTestCase "37.1 / 15.8" (37.1 / 15.8) "2.348" -- at the moment: 2.347
+     , reshowTestCase "3.11e-13 / 15" (3.11e-13 / 15) "2.0e-14"
+     , reshowTestCase "3.11e9 / 15" (3.11e9 / 15) "2.0e8"
      ]
   ]
 
