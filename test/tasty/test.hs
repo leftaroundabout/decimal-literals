@@ -78,6 +78,10 @@ tests = testGroup "Tests"
      ]
   , testGroup "Scientific deconstruction"
      [ scientificTest 0.2537 ((0,"2537"),0)
+     , scientificTest 1.12e-17 ((1,"12"),-17)
+     , scientificTest 1.12e17 ((1,"12"),17)
+     , scientificTest 12.412 ((12,"412"),0)
+     , scientificTest (-12.4) ((-12,"4"),0)
      ]
   ]
 
