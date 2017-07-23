@@ -56,7 +56,7 @@ instance Show FractionalLit where
 
 infixl 7 `unbiasedDiv`
 unbiasedDiv :: Integral a => a -> a -> a
-unbiasedDiv x y = (x - y`quot`2)`div`y
+unbiasedDiv x y = (x + y`quot`2)`div`y
 
 instance Num FractionalLit where
   fromInteger = ExactRatio . fromInteger
