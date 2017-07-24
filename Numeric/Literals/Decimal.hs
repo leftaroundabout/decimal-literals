@@ -13,6 +13,8 @@ module Numeric.Literals.Decimal
           ( FractionalLit
           , pattern (:%)
           , pattern Scientific
+          -- * Auxiliary
+          , B₁₀Digit
           ) where
 
 import Data.Ratio
@@ -22,7 +24,7 @@ import Data.Ratio
 --   a value was actually defined as an integer or a ratio, or as a decimal-fraction
 --   literal. This is useful to know for a type that supports both exact fraction
 --   values and more floating-point-like / physical values; it allows avoiding
---   things like @0.524@ showing up as @589971551185535/1125899906842624@, or conversely
+--   issues like @0.524@ showing up as @589971551185535/1125899906842624@, or conversely
 --   @7/23@ as @0.30434782608695654@. Both of these scenarios are quite awkward.
 data FractionalLit = ExactRatio Rational
                    | DecimalFraction {
@@ -33,6 +35,9 @@ asFraction :: FractionalLit -> Maybe (Integer, Integer)
 asFraction (ExactRatio r) = Just (numerator r, denominator r)
 asFraction (DecimalFraction _ _) = Nothing
 
+-- | Construct an exact fraction. The values behave like 'Rational', until combined
+--   – e.g. added – with a 'Scientific' value (which has an implicit
+--   measurement-uncertainty, and that carries over to the result).
 pattern (:%) :: Integer -> Integer -> FractionalLit
 pattern n:%d <- (asFraction -> Just (n,d))
  where n:%d = ExactRatio $ fromInteger n % fromInteger d
@@ -50,6 +55,15 @@ asScientific n = case break (=='e') $ show n of
            | otherwise     -> error $
                "Impossible digit "++[c]++" in number "++show n
 
+-- | Construct a scientific number of the form @m.n * 10^e@, where @m@ and @e@ are
+--   integers and @n@ is a list of digits after the decimal point. The result
+--   is considered to be only exact up to the precision indicated by the number
+--   of digits. I.e. @Scientific 2 [4,8,3]\ (-4)@ basically means @2.483×10⁻⁴ ± 10⁻⁷@,
+--   
+--   The 'Fractional' instance allows these values to be written in the standard
+--   @2.483e-4@ notation. Note that this cannot completely reconstruct the written
+--   form, e.g. @12.483e-4@ will actually show up as @Scientific 1 [2,4,8,3]\ (-3)@.
+--   Leading and trailing zeroes are always ignored.
 pattern Scientific :: Int        -- ^ Integral part of the mantissa
                    -> [B₁₀Digit] -- ^ Digits after the point of the mantissa
                    -> Int        -- ^ Base-10 exponent of the number in scientific form
@@ -60,7 +74,8 @@ pattern Scientific pc ac ex <- (asScientific -> Just ((pc,ac),ex))
               nqr n (d:ds) = nqr (n*10 + fromIntegral (fromEnum d)) ds
               
 
-data B₁₀Digit = D0 | D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8 | D9 deriving (Enum, Eq)
+-- | A number between @0@ and @9@.
+data B₁₀Digit = D0 | D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8 | D9 deriving (Enum, Eq, Ord)
 instance Show B₁₀Digit where show = show . fromEnum
 instance Num B₁₀Digit where
   fromInteger = toEnum . (`mod`10) . fromInteger
@@ -126,6 +141,11 @@ instance Num FractionalLit where
   signum (ExactRatio r) = ExactRatio $ signum r
   signum (DecimalFraction m e) = ExactRatio . fromIntegral $ signum m
 
+-- | Despite the name, 'fromRational' should /not/ be used to promote a 'Rational'
+--   value to 'FractionalLit', because that method contains the heuristic which interprets
+--   decimal\/scientific literals (which in Haskell are, perhaps unfortunately, always
+--   desugared through 'fromRational'). Use '/' or ':%' instead, to define exact-ratio
+--   values.
 instance Fractional FractionalLit where
   fromRational r
     | r < 0               = negate $ fromRational (-r)
