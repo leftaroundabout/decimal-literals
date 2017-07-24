@@ -103,7 +103,7 @@ instance Show FractionalLit where
    | otherwise          = shows $ numerator r
   showsPrec p (DecimalFraction m e)
    | m < 0             = showParen (p>5) $ ('-':) . shows (DecimalFraction (-m) e)
-   | e > 6 || e < -2   = case show m of
+   | e > 4 || e < -2   = case show m of
                lsh | e<0, length lsh + 1 > -e
                            -> case splitAt (-e) $ reverse lsh of
                              (acs, []) -> ("0."++) . (replicate (-e-length acs) '0'++)

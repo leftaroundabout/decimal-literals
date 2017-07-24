@@ -84,6 +84,7 @@ tests = testGroup "Tests"
      , scientificTest (-12.4) ((-12,"4"),0)
      , scientificTest 2.483e-4 ((2,"483"),-4)
      , scientificTest 12.483e-4 ((1,"2483"),-3)
+     , scientificTest 257.35e7 ((2,"5735"),9)
      ]
   ]
 
