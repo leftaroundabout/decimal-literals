@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                decimal-literals
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Preprocessing decimal literals more or less as they are (instead of via fractions)
 -- description:         
 license:             GPL-3
